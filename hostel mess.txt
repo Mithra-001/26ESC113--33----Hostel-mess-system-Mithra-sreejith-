@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_RESIDENTS 100
+#define NAME_LENGTH 100
+#define ROOM_LENGTH 20
+#define MEAL_RATE 100.0  /* Change this to your rate per meal */
+
+typedef struct {
+    char name[NAME_LENGTH];
+    char roomNumber[ROOM_LENGTH];
+    int mealsTaken;
+} Resident;
+
+Resident residents[MAX_RESIDENTS];
+int residentCount = 0;
+
+void clearInputBuffer(void) {
+    int ch;
+    while ((ch = getchar()) != '\n' && ch != EOF) {
+        /* Discard remaining input */
+    }
+}
+
+void addResident(void) {
+    if (residentCount >= MAX_RESIDENTS) {
+        printf("Resident list is full.\n");
+        return;
+    }
+
+    Resident resident;
+
+    printf("Resident name: ");
+    if (fgets(resident.name, sizeof(resident.name), stdin) == NULL) {
+        printf("Could not read name.\n");
+        return;
+    }
+    resident.name[strcspn(resident.name, "\n")] = '\0';
+
+    printf("Room number: ");
+    if (fgets(resident.roomNumber, sizeof(resident.roomNumber), stdin) == NULL) {
+        printf("Could not read room number.\n");
+        return;
+    }
+    resident.roomNumber[strcspn(resident.roomNumber, "\n")] = '\0';
+
+    printf("Meals taken: ");
+    if (scanf("%d", &resident.mealsTaken) != 1) {
+        printf("Please enter a valid whole number.\n");
+        clearInputBuffer();
+        return;
+    }
+    clearInputBuffer();
+
+    if (resident.mealsTaken < 0) {
+        printf("Meals taken cannot be negative.\n");
+        return;
+    }
+
+    residents[residentCount] = resident;
+    residentCount++;
+
+    printf("Resident added successfully.\n");
+}
+
+void viewResidents(void) {
+    int i;
+
+    if (residentCount == 0) {
+        printf("No residents have been added yet.\n");
+        return;
+    }
+
+    printf("\n%-25s %-15s %-10s %10s\n",
+           "Name", "Room", "Meals", "Bill");
+    printf("---------------------------------------------------------------\n");
+
+    for (i = 0; i < residentCount; i++) {
+        double bill = residents[i].mealsTaken * MEAL_RATE;
+
+        printf("%-25s %-15s %-10d %10.2f\n",
+               residents[i].name,
+               residents[i].roomNumber,
+               residents[i].mealsTaken,
+               bill);
+    }
+
+    printf("\nRate per meal: %.2f\n", MEAL_RATE);
+}
+
+int main(void) {
+    int choice;
+
+    while (1) {
+        printf("\nHostel Mess Bill\n");
+        printf("1. Add resident\n");
+        printf("2. View all residents and bills\n");
+        printf("3. Exit\n");
+        printf("Choose an option: ");
+
+        if (scanf("%d", &choice) != 1) {
+            printf("Please enter 1, 2, or 3.\n");
+            clearInputBuffer();
+            continue;
+        }
+        clearInputBuffer();
+
+        switch (choice) {
+            case 1:
+                addResident();
+                break;
+            case 2:
+                viewResidents();
+                break;
+            case 3:
+                printf("Goodbye!\n");
+                return 0;
+            default:
+                printf("Invalid option. Choose 1, 2, or 3.\n");
+        }
+    }
+}
